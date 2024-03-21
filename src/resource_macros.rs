@@ -131,3 +131,4 @@ macro_rules! xr_no_clone_resource_wrapper {
 pub use xr_arc_resource_wrapper;
 pub use xr_no_clone_resource_wrapper;
 pub use xr_resource_wrapper;
+pub use xr_resource_wrapper_copy;

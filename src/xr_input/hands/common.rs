@@ -2,7 +2,7 @@ use bevy::{
     core::Name,
     prelude::{
         default, Color, Commands, Component, Deref, DerefMut, Entity, Gizmos, Plugin, PostUpdate,
-        Query, Resource, SpatialBundle, Startup, Transform,
+        Query, Resource, SpatialBundle,
     },
     transform::components::GlobalTransform,
 };

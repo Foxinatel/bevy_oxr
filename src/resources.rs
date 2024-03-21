@@ -5,14 +5,9 @@ use std::sync::Mutex;
 use crate::input::XrInput;
 use crate::passthrough::{CompositionLayerPassthrough, XrPassthroughLayer};
 use crate::resource_macros::*;
-use crate::xr::sys::CompositionLayerPassthroughFB;
-use crate::xr::{CompositionLayerBase, CompositionLayerFlags};
-use crate::{resource_macros::*, xr_resource_wrapper_copy};
+use crate::xr::CompositionLayerFlags;
 use bevy::prelude::*;
-use bevy::prelude::*;
-use bevy::render::extract_component::ExtractComponent;
 use bevy::render::extract_resource::{ExtractResource, ExtractResourcePlugin};
-use core::ptr;
 use openxr as xr;
 #[cfg(all(feature = "d3d12", windows))]
 use winapi::um::d3d12::{ID3D12CommandQueue, ID3D12Device};

@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use bevy::{prelude::*, render::extract_resource::ExtractResource};
 use openxr as xr;
-use xr::{FrameState, FrameWaiter, ViewConfigurationType};
 
 #[derive(Clone, Resource, ExtractResource)]
 pub struct XrInput {

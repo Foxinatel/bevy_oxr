@@ -197,7 +197,7 @@ pub fn update_hand_bones(
             let bone_data = match (hand, &left_hand_data, &right_hand_data) {
                 (Hand::Left, Some(data), _) => data.get_joint(*bone),
                 (Hand::Right, _, Some(data)) => data.get_joint(*bone),
-                (hand, left_data, right_data) => {
+                _ => {
                     *status = BoneTrackingStatus::Emulated;
                     return;
                 }

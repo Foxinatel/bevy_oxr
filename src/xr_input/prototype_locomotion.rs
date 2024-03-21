@@ -1,19 +1,14 @@
 use std::f32::consts::PI;
 
-use bevy::{
-    prelude::*,
-    time::{Time, Timer, TimerMode},
-};
-
-use crate::{
-    input::XrInput,
-    resources::{XrFrameState, XrInstance, XrSession, XrViews},
-};
-
 use super::{
     actions::XrActionSets, oculus_touch::OculusController, trackers::OpenXRTrackingRoot, Hand,
     QuatConv, Vec3Conv,
 };
+use crate::{
+    input::XrInput,
+    resources::{XrFrameState, XrSession, XrViews},
+};
+use bevy::prelude::*;
 
 pub enum LocomotionType {
     Head,
@@ -121,17 +116,15 @@ pub fn proto_locomotion(
                     );
                     //apply rotation
                     let views = views.first();
-                    match views {
-                        Some(view) => {
-                            let mut hmd_translation = view.pose.position.to_vec3();
-                            hmd_translation.y = 0.0;
-                            let local = position.translation;
-                            let global = position.rotation.mul_vec3(hmd_translation) + local;
-                            gizmos.circle(global, position.up(), 0.1, Color::GREEN);
-                            position.rotate_around(global, smoth_rot);
-                        }
-                        None => return,
-                    }
+                    let Some(view) = views else {
+                        return;
+                    };
+                    let mut hmd_translation = view.pose.position.to_vec3();
+                    hmd_translation.y = 0.0;
+                    let local = position.translation;
+                    let global = position.rotation.mul_vec3(hmd_translation) + local;
+                    gizmos.circle(global, position.up(), 0.1, Color::GREEN);
+                    position.rotate_around(global, smoth_rot);
                 }
                 RotationType::Snap => {
                     //tick the timer

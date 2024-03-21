@@ -4,7 +4,6 @@ use crate::xr_input::{QuatConv, Vec3Conv};
 use crate::{locate_views, xr_wait_frame, LEFT_XR_TEXTURE_HANDLE, RIGHT_XR_TEXTURE_HANDLE};
 use bevy::core_pipeline::core_3d::graph::Core3d;
 use bevy::core_pipeline::tonemapping::{DebandDither, Tonemapping};
-use bevy::ecs::system::lifetimeless::Read;
 use bevy::math::Vec3A;
 use bevy::prelude::*;
 use bevy::render::camera::{

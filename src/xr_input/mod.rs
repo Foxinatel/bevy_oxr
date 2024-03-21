@@ -9,36 +9,15 @@ pub mod prototype_locomotion;
 pub mod trackers;
 pub mod xr_camera;
 
-use crate::resources::{XrInstance, XrSession};
 use crate::xr_init::{xr_only, XrCleanup, XrPostSetup, XrPreSetup, XrSetup};
 use crate::xr_input::oculus_touch::setup_oculus_controller;
-use crate::xr_input::xr_camera::{xr_camera_head_sync, Eye, XRProjection, XrCameraBundle};
-use crate::{locate_views, xr_wait_frame};
-use bevy::app::{App, PostUpdate, Startup};
-use bevy::ecs::entity::Entity;
-use bevy::ecs::query::With;
-use bevy::ecs::system::Query;
-use bevy::hierarchy::DespawnRecursiveExt;
-use bevy::log::{info, warn};
-use bevy::math::Vec2;
-use bevy::prelude::{BuildChildren, Component, Deref, DerefMut, IntoSystemConfigs, Resource};
-use bevy::prelude::{Commands, Plugin, PreUpdate, Quat, Res, SpatialBundle, Update, Vec3};
-use bevy::render::camera::CameraProjectionPlugin;
-use bevy::render::extract_component::ExtractComponentPlugin;
-use bevy::render::view::{update_frusta, VisibilitySystems};
-use bevy::transform::TransformSystem;
-use bevy::utils::HashMap;
-use openxr::Binding;
+use bevy::log::info;
+use bevy::prelude::*;
 
-use self::actions::{setup_oxr_actions, XrActionsPlugin};
 use self::oculus_touch::{
-    init_subaction_path, post_action_setup_oculus_controller, ActionSets, OculusController,
+    init_subaction_path, post_action_setup_oculus_controller, OculusController,
 };
-use self::trackers::{
-    adopt_open_xr_trackers, update_open_xr_controllers, OpenXRLeftEye, OpenXRRightEye,
-    OpenXRTrackingRoot,
-};
-use self::xr_camera::{/* GlobalTransformExtract, TransformExtract, */ XrCamera};
+use self::trackers::{adopt_open_xr_trackers, update_open_xr_controllers, OpenXRTrackingRoot};
 
 #[derive(Copy, Clone)]
 pub struct XrInputPlugin;

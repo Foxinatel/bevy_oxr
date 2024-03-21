@@ -92,7 +92,7 @@ pub fn start_xr_session(
 }
 pub fn initialize_xr_instance(
     backend_preference: &[Backend],
-    window: Option<RawHandleWrapper>,
+    // window: Option<RawHandleWrapper>,
     reqeusted_extensions: XrExtensions,
     prefered_blend_mode: XrPreferdBlendMode,
     app_info: XrAppInfo,
@@ -124,7 +124,7 @@ pub fn initialize_xr_instance(
                     continue;
                 }
                 return vulkan::initialize_xr_instance(
-                    window,
+                    // window,
                     xr_entry,
                     reqeusted_extensions,
                     available_extensions,
@@ -181,7 +181,7 @@ pub fn try_full_init(
         wgpu_instance,
     ) = initialize_xr_instance(
         backend_preference,
-        primary_window.clone(),
+        // primary_window.clone(),
         reqeusted_extensions,
         prefered_blend_mode,
         app_info,

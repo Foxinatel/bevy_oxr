@@ -14,14 +14,12 @@ use crate::xr_input::oculus_touch::ActionSets;
 use crate::xr_input::trackers::verify_quat;
 use bevy::app::{AppExit, PluginGroupBuilder};
 use bevy::core::TaskPoolThreadAssignmentPolicy;
-use bevy::ecs::system::SystemState;
 use bevy::prelude::*;
 use bevy::render::camera::{ManualTextureView, ManualTextureViewHandle, ManualTextureViews};
 use bevy::render::pipelined_rendering::PipelinedRenderingPlugin;
 use bevy::render::renderer::{render_system, RenderInstance};
 use bevy::render::settings::RenderCreation;
 use bevy::render::{Render, RenderApp, RenderPlugin, RenderSet};
-use bevy::window::{PresentMode, PrimaryWindow, RawHandleWrapper};
 use graphics::extensions::XrExtensions;
 use graphics::{XrAppInfo, XrPreferdBlendMode};
 use input::XrInput;
@@ -30,8 +28,8 @@ use passthrough::{PassthroughPlugin, XrPassthroughLayer, XrPassthroughState};
 use resources::*;
 use xr_init::{
     xr_after_wait_only, xr_only, xr_render_only, CleanupRenderWorld, CleanupXrData,
-    ExitAppOnSessionExit, SetupXrData, StartSessionOnStartup, XrCleanup, XrEarlyInitPlugin,
-    XrHasWaited, XrPostCleanup, XrShouldRender, XrStatus,
+    ExitAppOnSessionExit, SetupXrData, StartSessionOnStartup, XrEarlyInitPlugin, XrHasWaited,
+    XrPostCleanup, XrShouldRender, XrStatus,
 };
 use xr_input::actions::XrActionsPlugin;
 use xr_input::hands::emulated::HandEmulationPlugin;
@@ -39,6 +37,9 @@ use xr_input::hands::hand_tracking::HandTrackingPlugin;
 use xr_input::hands::HandPlugin;
 use xr_input::xr_camera::XrCameraPlugin;
 use xr_input::XrInputPlugin;
+
+#[cfg(not(target_os = "android"))]
+use bevy::window::PresentMode;
 
 const VIEW_TYPE: xr::ViewConfigurationType = xr::ViewConfigurationType::PRIMARY_STEREO;
 
@@ -61,11 +62,11 @@ impl Plugin for OpenXrPlugin {
         #[cfg(not(target_arch = "wasm32"))]
         match graphics::initialize_xr_instance(
             &self.backend_preference,
-            SystemState::<Query<&RawHandleWrapper, With<PrimaryWindow>>>::new(&mut app.world)
-                .get(&app.world)
-                .get_single()
-                .ok()
-                .cloned(),
+            // SystemState::<Query<&RawHandleWrapper, With<PrimaryWindow>>>::new(&mut app.world)
+            //     .get(&app.world)
+            //     .get_single()
+            //     .ok()
+            //     .cloned(),
             self.reqeusted_extensions.clone(),
             self.prefered_blend_mode,
             self.app_info.clone(),
@@ -472,7 +473,7 @@ pub fn xr_end_frame(
     {
         let ctx = ndk_context::android_context();
         let vm = unsafe { jni::JavaVM::from_raw(ctx.vm().cast()) }.unwrap();
-        let env = vm.attach_current_thread_as_daemon();
+        vm.attach_current_thread_as_daemon().unwrap();
     }
 
     {

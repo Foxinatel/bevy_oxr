@@ -7,11 +7,11 @@ use crate::{
 };
 
 use self::{
-    common::{spawn_hand_entities, HandBoneRadius, HandsResource},
+    common::{spawn_hand_entities, HandsResource},
     hand_tracking::{DisableHandTracking, HandTrackingData},
 };
 
-use super::{trackers::OpenXRTracker, Hand};
+use super::trackers::OpenXRTracker;
 
 pub mod common;
 pub mod emulated;

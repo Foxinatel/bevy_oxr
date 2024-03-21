@@ -4,8 +4,7 @@ use crate::xr_input::controllers::Handed;
 use crate::xr_input::Hand;
 use bevy::prelude::{default, Commands, Res, ResMut, Resource};
 use openxr::{
-    ActionSet, AnyGraphics, FrameState, Instance, Path, Posef, Session, Space, SpaceLocation,
-    SpaceVelocity,
+    ActionSet, AnyGraphics, FrameState, Path, Posef, Session, Space, SpaceLocation, SpaceVelocity,
 };
 
 use std::sync::OnceLock;
@@ -46,7 +45,7 @@ pub fn post_action_setup_oculus_controller(
 }
 pub fn setup_oculus_controller(
     mut commands: Commands,
-    instance: Res<XrInstance>,
+    // instance: Res<XrInstance>,
     action_sets: ResMut<SetupActionSets>,
 ) {
     let oculus_controller = OculusController::new(action_sets).unwrap();
@@ -141,7 +140,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_f32("oculus_input", "squeeze")
             .unwrap()
-            .state(&self.session, subaction_path(hand))
+            .state(self.session, subaction_path(hand))
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -153,7 +152,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_f32("oculus_input", "trigger")
             .unwrap()
-            .state(&self.session, subaction_path(hand))
+            .state(self.session, subaction_path(hand))
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -165,7 +164,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_bool("oculus_input", "trigger_touched")
             .unwrap()
-            .state(&self.session, subaction_path(hand))
+            .state(self.session, subaction_path(hand))
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -177,7 +176,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_bool("oculus_input", "x_button")
             .unwrap()
-            .state(&self.session, Path::NULL)
+            .state(self.session, Path::NULL)
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -189,7 +188,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_bool("oculus_input", "x_button_touch")
             .unwrap()
-            .state(&self.session, Path::NULL)
+            .state(self.session, Path::NULL)
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -201,7 +200,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_bool("oculus_input", "y_button")
             .unwrap()
-            .state(&self.session, Path::NULL)
+            .state(self.session, Path::NULL)
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -213,7 +212,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_bool("oculus_input", "y_button_touch")
             .unwrap()
-            .state(&self.session, Path::NULL)
+            .state(self.session, Path::NULL)
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -225,7 +224,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_bool("oculus_input", "menu_button")
             .unwrap()
-            .state(&self.session, Path::NULL)
+            .state(self.session, Path::NULL)
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -237,7 +236,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_bool("oculus_input", "a_button")
             .unwrap()
-            .state(&self.session, Path::NULL)
+            .state(self.session, Path::NULL)
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -249,7 +248,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_bool("oculus_input", "a_button_touch")
             .unwrap()
-            .state(&self.session, Path::NULL)
+            .state(self.session, Path::NULL)
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -261,7 +260,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_bool("oculus_input", "b_button")
             .unwrap()
-            .state(&self.session, Path::NULL)
+            .state(self.session, Path::NULL)
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -273,7 +272,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_bool("oculus_input", "b_button_touch")
             .unwrap()
-            .state(&self.session, Path::NULL)
+            .state(self.session, Path::NULL)
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -285,7 +284,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_bool("oculus_input", "thumbstick_touch")
             .unwrap()
-            .state(&self.session, subaction_path(hand))
+            .state(self.session, subaction_path(hand))
         {
             Ok(v) => v,
             Err(_) => return default(),
@@ -298,7 +297,7 @@ impl OculusControllerRef<'_> {
                 .action_sets
                 .get_action_f32("oculus_input", "thumbstick_x")
                 .unwrap()
-                .state(&self.session, subaction_path(hand))
+                .state(self.session, subaction_path(hand))
                 .map(|v| v.current_state)
             {
                 Ok(v) => v,
@@ -308,7 +307,7 @@ impl OculusControllerRef<'_> {
                 .action_sets
                 .get_action_f32("oculus_input", "thumbstick_y")
                 .unwrap()
-                .state(&self.session, subaction_path(hand))
+                .state(self.session, subaction_path(hand))
                 .map(|v| v.current_state)
             {
                 Ok(v) => v,
@@ -318,7 +317,7 @@ impl OculusControllerRef<'_> {
                 .action_sets
                 .get_action_bool("oculus_input", "thumbstick_click")
                 .unwrap()
-                .state(&self.session, subaction_path(hand))
+                .state(self.session, subaction_path(hand))
                 .map(|v| v.current_state)
             {
                 Ok(v) => v,
@@ -331,7 +330,7 @@ impl OculusControllerRef<'_> {
             .action_sets
             .get_action_bool("oculus_input", "thumbrest_touch")
             .unwrap()
-            .state(&self.session, subaction_path(hand))
+            .state(self.session, subaction_path(hand))
         {
             Ok(v) => v,
             Err(_) => return default(),

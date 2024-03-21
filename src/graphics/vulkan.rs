@@ -1,6 +1,6 @@
 use std::ffi::{c_void, CString};
 use std::sync::atomic::AtomicBool;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 // use anyhow::Context;
 use ash::vk::{self, Handle};
@@ -27,7 +27,7 @@ use crate::VIEW_TYPE;
 use super::{XrAppInfo, XrPreferdBlendMode};
 
 pub fn initialize_xr_instance(
-    window: Option<RawHandleWrapper>,
+    // window: Option<RawHandleWrapper>,
     xr_entry: xr::Entry,
     reqeusted_extensions: XrExtensions,
     available_extensions: XrExtensions,
@@ -57,7 +57,7 @@ pub fn initialize_xr_instance(
         enabled_extensions.khr_android_create_instance = true;
     }
 
-    let available_layers = xr_entry.enumerate_layers()?;
+    // let available_layers = xr_entry.enumerate_layers()?;
     // info!("available OpenXR layers: {:#?}", available_layers);
 
     let xr_instance = xr_entry.create_instance(
@@ -131,7 +131,7 @@ pub fn initialize_xr_instance(
     let vk_entry = unsafe { ash::Entry::load() }?;
     let flags = wgpu::InstanceFlags::from_build_config();
     let extensions = <V as Api>::Instance::desired_extensions(&vk_entry, vk_target_version, flags)?;
-    let device_extensions = vec![
+    let device_extensions = [
         ash::extensions::khr::Swapchain::name(),
         ash::extensions::khr::DrawIndirectCount::name(),
         #[cfg(target_os = "android")]
@@ -217,7 +217,7 @@ pub fn initialize_xr_instance(
         .required_device_extensions(wgpu_features);
 
     let (wgpu_open_device, vk_device_ptr, queue_family_index) = {
-        let extensions_cchar: Vec<_> = device_extensions.iter().map(|s| s.as_ptr()).collect();
+        let extensions_cchar: &[_] = &device_extensions.map(|s| s.as_ptr());
         let mut enabled_phd_features = wgpu_exposed_adapter
             .adapter
             .physical_device_features(&enabled_extensions, wgpu_features);
@@ -236,7 +236,7 @@ pub fn initialize_xr_instance(
                         ..Default::default()
                     }),
             )
-            .enabled_extension_names(&extensions_cchar)
+            .enabled_extension_names(extensions_cchar)
             .build();
         let vk_device = unsafe {
             let vk_device = xr_instance
@@ -307,7 +307,7 @@ pub fn initialize_xr_instance(
         RenderQueue(wgpu_queue.into()),
         RenderAdapterInfo(wgpu_adapter.get_info()),
         RenderAdapter(wgpu_adapter.into()),
-        wgpu_instance.into(),
+        wgpu_instance,
     ))
 }
 
@@ -418,7 +418,7 @@ pub fn start_xr_session(
                     None,
                 )
             };
-            let texture = unsafe {
+            unsafe {
                 wgpu_device.create_texture_from_hal::<V>(
                     wgpu_hal_texture,
                     &wgpu::TextureDescriptor {
@@ -437,8 +437,7 @@ pub fn start_xr_session(
                         view_formats: &[],
                     },
                 )
-            };
-            texture
+            }
         })
         .collect();
 
