@@ -246,10 +246,23 @@ impl<G: xr::Graphics> SwapchainInner<G> {
             warn!("views are len of 0");
             return Ok(());
         }
+
+        let make_view = |i: usize| {
+            xr::CompositionLayerProjectionView::new()
+                .pose(views[i].pose)
+                .fov(views[i].fov)
+                .sub_image(
+                    xr::SwapchainSubImage::new()
+                        .swapchain(&swapchain)
+                        .image_array_index(i as u32)
+                        .image_rect(rect),
+                )
+        };
+        let views = [make_view(0), make_view(1)];
+
         match passthrough_layer {
             Some(pass) => {
                 //bevy::log::info!("Rendering with pass through");
-
                 self.stream.lock().unwrap().end(
                     predicted_display_time,
                     environment_blend_mode,
@@ -258,55 +271,18 @@ impl<G: xr::Graphics> SwapchainInner<G> {
                         &xr::CompositionLayerProjection::new()
                             .layer_flags(CompositionLayerFlags::BLEND_TEXTURE_SOURCE_ALPHA)
                             .space(stage)
-                            .views(&[
-                                xr::CompositionLayerProjectionView::new()
-                                    .pose(views[0].pose)
-                                    .fov(views[0].fov)
-                                    .sub_image(
-                                        xr::SwapchainSubImage::new()
-                                            .swapchain(&swapchain)
-                                            .image_array_index(0)
-                                            .image_rect(rect),
-                                    ),
-                                xr::CompositionLayerProjectionView::new()
-                                    .pose(views[1].pose)
-                                    .fov(views[1].fov)
-                                    .sub_image(
-                                        xr::SwapchainSubImage::new()
-                                            .swapchain(&swapchain)
-                                            .image_array_index(1)
-                                            .image_rect(rect),
-                                    ),
-                            ]),
+                            .views(&views),
                     ],
                 )
             }
-
             None => {
                 // bevy::log::info!("Rendering without pass through");
                 self.stream.lock().unwrap().end(
                     predicted_display_time,
                     environment_blend_mode,
-                    &[&xr::CompositionLayerProjection::new().space(stage).views(&[
-                        xr::CompositionLayerProjectionView::new()
-                            .pose(views[0].pose)
-                            .fov(views[0].fov)
-                            .sub_image(
-                                xr::SwapchainSubImage::new()
-                                    .swapchain(&swapchain)
-                                    .image_array_index(0)
-                                    .image_rect(rect),
-                            ),
-                        xr::CompositionLayerProjectionView::new()
-                            .pose(views[1].pose)
-                            .fov(views[1].fov)
-                            .sub_image(
-                                xr::SwapchainSubImage::new()
-                                    .swapchain(&swapchain)
-                                    .image_array_index(1)
-                                    .image_rect(rect),
-                            ),
-                    ])],
+                    &[&xr::CompositionLayerProjection::new()
+                        .space(stage)
+                        .views(&views)],
                 )
             }
         }
