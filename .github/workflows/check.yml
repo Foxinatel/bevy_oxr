@@ -21,7 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: apt-get update
       - uses: awalsh128/cache-apt-pkgs-action@v1
         with:
           packages: clang llvm
@@ -53,7 +52,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: apt-get update
       - uses: awalsh128/cache-apt-pkgs-action@v1
         with:
           packages: libasound2-dev portaudio19-dev build-essential libpulse-dev libdbus-1-dev libudev-dev libopenxr-loader1 libopenxr-dev
@@ -70,4 +68,4 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Check
-        run: RUSTFLAGS=-Dwarnings cargo check --all-features
+        run: $env:RUSTFLAGS="-Dwarnings"; cargo check --all-features
