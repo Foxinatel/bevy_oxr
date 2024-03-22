@@ -137,7 +137,7 @@ pub fn initialize_xr_instance(
                     continue;
                 }
                 return d3d12::initialize_xr_instance(
-                    window,
+                    // window,
                     xr_entry,
                     reqeusted_extensions,
                     available_extensions,

@@ -1,18 +1,18 @@
 use std::sync::atomic::AtomicBool;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 // use anyhow::Context;
 use bevy::math::uvec2;
 use bevy::prelude::*;
 use bevy::render::renderer::{RenderAdapter, RenderAdapterInfo, RenderDevice, RenderQueue};
 use bevy::window::RawHandleWrapper;
-use eyre::{Context, ContextCompat};
+use eyre::ContextCompat;
 use openxr as xr;
 use wgpu::Instance;
 use wgpu_hal::{api::Dx12, Api};
 use wgpu_hal::{Adapter as HalAdapter, Instance as HalInstance};
-use winapi::shared::dxgiformat::{self, DXGI_FORMAT};
-use winapi::um::{d3d12 as winapi_d3d12, d3dcommon};
+use winapi::shared::dxgiformat::DXGI_FORMAT;
+use winapi::um::d3d12 as winapi_d3d12;
 use xr::EnvironmentBlendMode;
 
 use crate::graphics::extensions::XrExtensions;
@@ -25,14 +25,12 @@ use crate::resources::{
 
 #[cfg(all(feature = "d3d12", windows))]
 use crate::resources::D3D12OXrSessionSetupInfo;
-#[cfg(feature = "vulkan")]
-use crate::resources::VulkanOXrSessionSetupInfo;
 
 use super::{XrAppInfo, XrPreferdBlendMode};
 use crate::VIEW_TYPE;
 
 pub fn initialize_xr_instance(
-    window: Option<RawHandleWrapper>,
+    // window: Option<RawHandleWrapper>,
     xr_entry: xr::Entry,
     reqeusted_extensions: XrExtensions,
     available_extensions: XrExtensions,
@@ -58,7 +56,7 @@ pub fn initialize_xr_instance(
         (available_extensions & reqeusted_extensions).into();
     enabled_extensions.khr_d3d12_enable = true;
 
-    let available_layers = xr_entry.enumerate_layers()?;
+    // let available_layers = xr_entry.enumerate_layers()?;
     //info!("available xr layers: {:#?}", available_layers);
 
     let xr_instance = xr_entry.create_instance(
@@ -169,7 +167,7 @@ pub fn initialize_xr_instance(
         );
     }
 
-    let (session, frame_wait, frame_stream) = unsafe {
+    let (_session, _frame_wait, _frame_stream) = unsafe {
         xr_instance.create_session::<xr::D3D12>(
             xr_system_id,
             &xr::d3d::SessionCreateInfoD3D12 {
