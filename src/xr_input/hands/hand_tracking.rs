@@ -71,9 +71,7 @@ impl HandJoints {
     pub fn inner(&self) -> &[HandJoint; 26] {
         &self.inner
     }
-}
 
-impl HandJoints {
     pub fn get_joint(&self, bone: HandBone) -> &HandJoint {
         &self.inner[bone.get_index_from_bone()]
     }
@@ -167,13 +165,11 @@ pub fn update_hand_bones(
         &mut BoneTrackingStatus,
     )>,
 ) {
-    let hand_ref = match hand_tracking.as_ref() {
-        Some(h) => h.get_ref(&xr_input, &xr_frame_state),
-        None => {
-            warn!("No Handtracking data!");
-            return;
-        }
+    let Some(hand_ref) = hand_tracking else {
+        warn!("No Handtracking data!");
+        return;
     };
+    let hand_ref = hand_ref.get_ref(&xr_input, &xr_frame_state);
     let left_hand_data = hand_ref.get_poses(Hand::Left);
     let right_hand_data = hand_ref.get_poses(Hand::Right);
     // if left_hand_data.is_none() || right_hand_data.is_none() {
@@ -183,20 +179,16 @@ pub fn update_hand_bones(
     bones
         .par_iter_mut()
         .for_each(|(mut transform, hand, bone, mut radius, mut status)| {
-            match (&hand, disabled_tracking.as_ref().map(|d| d.as_ref())) {
-                (Hand::Left, Some(DisableHandTracking::OnlyLeft)) => {
-                    *status = BoneTrackingStatus::Emulated;
-                    return;
-                }
-                (Hand::Right, Some(DisableHandTracking::OnlyRight)) => {
-                    *status = BoneTrackingStatus::Emulated;
-                    return;
-                }
-                _ => {}
+            if matches!(
+                (&hand, disabled_tracking.as_ref().map(|d| d.as_ref())),
+                (Hand::Left, Some(DisableHandTracking::OnlyLeft))
+                    | (Hand::Right, Some(DisableHandTracking::OnlyRight))
+            ) {
+                *status = BoneTrackingStatus::Emulated;
+                return;
             }
             let bone_data = match (hand, &left_hand_data, &right_hand_data) {
-                (Hand::Left, Some(data), _) => data.get_joint(*bone),
-                (Hand::Right, _, Some(data)) => data.get_joint(*bone),
+                (Hand::Left, Some(data), _) | (Hand::Right, _, Some(data)) => data.get_joint(*bone),
                 _ => {
                     *status = BoneTrackingStatus::Emulated;
                     return;

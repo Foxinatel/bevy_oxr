@@ -354,6 +354,7 @@ fn xr_poll_events(
                     // Session state change is where we can begin and end sessions, as well as
                     // find quit messages!
                     info!("entered XR state {:?}", e.state());
+                    use ExitAppOnSessionExit::*;
                     match e.state() {
                         xr::SessionState::READY => {
                             info!("Calling Session begin :3");
@@ -366,22 +367,15 @@ fn xr_poll_events(
                             session_running.store(false, std::sync::atomic::Ordering::Relaxed);
                             cleanup_xr.send_default();
                         }
-                        xr::SessionState::EXITING => {
-                            if *exit_type == ExitAppOnSessionExit::Always
-                                || *exit_type == ExitAppOnSessionExit::OnlyOnExit
-                            {
-                                app_exit.send_default();
-                            }
+                        xr::SessionState::EXITING if matches!(*exit_type, Always | OnlyOnExit) => {
+                            app_exit.send_default();
                         }
-                        xr::SessionState::LOSS_PENDING => {
-                            if *exit_type == ExitAppOnSessionExit::Always {
-                                app_exit.send_default();
-                            }
-                            if *exit_type == ExitAppOnSessionExit::OnlyOnExit {
-                                start_session.send_default();
-                            }
+                        xr::SessionState::LOSS_PENDING if *exit_type == Always => {
+                            app_exit.send_default();
                         }
-
+                        xr::SessionState::LOSS_PENDING if *exit_type == OnlyOnExit => {
+                            start_session.send_default();
+                        }
                         _ => {}
                     }
                 }
@@ -494,9 +488,8 @@ pub fn xr_end_frame(
             **environment_blend_mode,
             pass_layer,
         );
-        match result {
-            Ok(_) => {}
-            Err(e) => warn!("error: {}", e),
+        if let Err(e) = result {
+            warn!("error: {}", e)
         }
     }
 }
@@ -508,31 +501,25 @@ pub fn locate_views(
     xr_frame_state: Res<XrFrameState>,
 ) {
     let _span = info_span!("xr_locate_views").entered();
-    **views = match session.locate_views(
+    match session.locate_views(
         VIEW_TYPE,
         xr_frame_state.predicted_display_time,
         &input.stage,
     ) {
-        Ok(this) => this
-            .1
-            .into_iter()
-            .map(|mut view| {
-                use crate::prelude::*;
-                let quat = view.pose.orientation.to_quat();
-                let fixed_quat = verify_quat(quat);
-                let oxr_quat = xr::Quaternionf {
-                    x: fixed_quat.x,
-                    y: fixed_quat.y,
-                    z: fixed_quat.z,
-                    w: fixed_quat.w,
-                };
-                view.pose.orientation = oxr_quat;
-                view
-            })
-            .collect(),
+        Ok((_, new_views)) => {
+            **views = new_views
+                .into_iter()
+                .map(|mut view| {
+                    use crate::prelude::*;
+                    let quat = view.pose.orientation.to_quat();
+                    let [x, y, z, w] = verify_quat(quat).to_array();
+                    view.pose.orientation = xr::Quaternionf { x, y, z, w };
+                    view
+                })
+                .collect()
+        }
         Err(err) => {
-            warn!("error: {}", err);
-            return;
+            warn!("error: {err}")
         }
     }
 }

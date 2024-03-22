@@ -236,11 +236,8 @@ fn start_xr_session(
 }
 
 fn stop_xr_session(session: ResMut<XrSession>, mut status: ResMut<XrStatus>) {
-    match session.request_exit() {
-        Ok(_) => {}
-        Err(err) => {
-            error!("Error while trying to request session exit: {}", err)
-        }
+    if let Err(err) = session.request_exit() {
+        error!("Error while trying to request session exit: {err}")
     }
     *status = XrStatus::Disabling;
 }

@@ -161,8 +161,8 @@ pub fn spawn_hand_entities(mut commands: Commands) {
     let bones = HandBone::get_all_bones();
     //hand resource
     let mut hand_resource = HandsResource { ..default() };
-    for hand in hands.iter() {
-        for bone in bones.iter() {
+    for hand in &hands {
+        for bone in &bones {
             let boneid = commands
                 .spawn((
                     Name::new(format!("{:?} {:?}", hand, bone)),

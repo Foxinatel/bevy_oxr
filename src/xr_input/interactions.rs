@@ -116,21 +116,18 @@ pub fn draw_interaction_gizmos(
             };
             gizmos.cuboid(local, color);
         }
-        if ray.is_some() {
-            match aim {
-                Some(aim) => {
-                    let color = match interactor_state {
-                        XRInteractorState::Idle => Color::BLUE,
-                        XRInteractorState::Selecting => Color::PURPLE,
-                    };
-                    gizmos.ray(
-                        root.translation + root.rotation.mul_vec3(aim.0.translation),
-                        root.rotation.mul_vec3(*aim.0.forward()),
-                        color,
-                    );
-                }
-                None => todo!(),
-            }
+        if let (Some(_), Some(AimPose(aim))) = (ray, aim) {
+            let color = match interactor_state {
+                XRInteractorState::Idle => Color::BLUE,
+                XRInteractorState::Selecting => Color::PURPLE,
+            };
+            gizmos.ray(
+                root.translation + root.rotation.mul_vec3(aim.translation),
+                root.rotation.mul_vec3(*aim.forward()),
+                color,
+            );
+        } else {
+            todo!()
         }
     }
 }
@@ -158,12 +155,11 @@ pub fn socket_interactions(
     >,
     mut writer: EventWriter<InteractionEvent>,
 ) {
-    for interactable in interactable_query.iter() {
+    for (xr_interactable_global_transform, _, interactable) in interactable_query.iter() {
         //for the interactables
-        for socket in interactor_query.iter() {
-            let interactor_global_transform = socket.0;
-            let xr_interactable_global_transform = interactable.0;
-            let interactor_state = socket.1;
+        for (interactor_global_transform, interactor_state, interactor, _) in
+            interactor_query.iter()
+        {
             //check for sphere overlaps
             let size = 0.1;
             if interactor_global_transform
@@ -176,25 +172,15 @@ pub fn socket_interactions(
                 )
                 < (size * size) * 2.0
             {
-                //check for selections first
-                match interactor_state {
-                    XRInteractorState::Idle => {
-                        let event = InteractionEvent {
-                            interactor: socket.2,
-                            interactable: interactable.2,
-                            interactable_state: XRInteractableState::Hover,
-                        };
-                        writer.send(event);
-                    }
-                    XRInteractorState::Selecting => {
-                        let event = InteractionEvent {
-                            interactor: socket.2,
-                            interactable: interactable.2,
-                            interactable_state: XRInteractableState::Select,
-                        };
-                        writer.send(event);
-                    }
-                }
+                let event = InteractionEvent {
+                    interactor,
+                    interactable,
+                    interactable_state: match interactor_state {
+                        XRInteractorState::Idle => XRInteractableState::Hover,
+                        XRInteractorState::Selecting => XRInteractableState::Select,
+                    },
+                };
+                writer.send(event);
             }
         }
     }
@@ -237,24 +223,15 @@ pub fn interactions(
                     < (size * size) * 2.0
                 {
                     //check for selections first
-                    match interactor_state {
-                        XRInteractorState::Idle => {
-                            let event = InteractionEvent {
-                                interactor: interactor_entity,
-                                interactable: interactable_entity,
-                                interactable_state: XRInteractableState::Hover,
-                            };
-                            writer.send(event);
-                        }
-                        XRInteractorState::Selecting => {
-                            let event = InteractionEvent {
-                                interactor: interactor_entity,
-                                interactable: interactable_entity,
-                                interactable_state: XRInteractableState::Select,
-                            };
-                            writer.send(event);
-                        }
-                    }
+                    let event = InteractionEvent {
+                        interactor: interactor_entity,
+                        interactable: interactable_entity,
+                        interactable_state: match interactor_state {
+                            XRInteractorState::Idle => XRInteractableState::Hover,
+                            XRInteractorState::Selecting => XRInteractableState::Select,
+                        },
+                    };
+                    writer.send(event);
                 }
             }
             if ray.is_some() {
@@ -264,40 +241,28 @@ pub fn interactions(
                 let radius: f32 = 0.1;
                 //I hate this but the aim pose needs the root for now
                 let root = tracking_root_query.get_single().unwrap();
-                match aim {
-                    Some(aim) => {
-                        let ray_origin =
-                            root.translation + root.rotation.mul_vec3(aim.0.translation);
-                        let ray_dir = root.rotation.mul_vec3(*aim.0.forward());
+                if let Some(aim) = aim {
+                    let ray_origin = root.translation + root.rotation.mul_vec3(aim.0.translation);
+                    let ray_dir = root.rotation.mul_vec3(*aim.0.forward());
 
-                        if ray_sphere_intersection(
-                            center,
-                            radius,
-                            ray_origin,
-                            ray_dir.normalize_or_zero(),
-                        ) {
-                            //check for selections first
-                            match interactor_state {
-                                XRInteractorState::Idle => {
-                                    let event = InteractionEvent {
-                                        interactor: interactor_entity,
-                                        interactable: interactable_entity,
-                                        interactable_state: XRInteractableState::Hover,
-                                    };
-                                    writer.send(event);
-                                }
-                                XRInteractorState::Selecting => {
-                                    let event = InteractionEvent {
-                                        interactor: interactor_entity,
-                                        interactable: interactable_entity,
-                                        interactable_state: XRInteractableState::Select,
-                                    };
-                                    writer.send(event);
-                                }
-                            }
-                        }
+                    if ray_sphere_intersection(
+                        center,
+                        radius,
+                        ray_origin,
+                        ray_dir.normalize_or_zero(),
+                    ) {
+                        let event = InteractionEvent {
+                            interactor: interactor_entity,
+                            interactable: interactable_entity,
+                            interactable_state: match interactor_state {
+                                XRInteractorState::Idle => XRInteractableState::Hover,
+                                XRInteractorState::Selecting => XRInteractableState::Select,
+                            },
+                        };
+                        writer.send(event);
                     }
-                    None => info!("no aim pose"),
+                } else {
+                    info!("no aim pose")
                 }
             }
         }

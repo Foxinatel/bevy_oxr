@@ -395,13 +395,8 @@ pub fn sync_actions(action_sets: Res<XrActionSets>, session: Res<XrSession>) {
     let active_sets = action_sets
         .sets
         .values()
-        .filter_map(|set| {
-            if set.enabled {
-                Some(xr::ActiveActionSet::new(&set.oxr_action_set))
-            } else {
-                None
-            }
-        })
+        .filter(|&set| set.enabled)
+        .map(|set| xr::ActiveActionSet::new(&set.oxr_action_set))
         .collect::<Vec<_>>();
     if let Err(err) = session.sync_actions(&active_sets) {
         warn!("OpenXR action sync error: {}", err);

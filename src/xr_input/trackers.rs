@@ -33,15 +33,14 @@ pub fn adopt_open_xr_trackers(
     tracking_root_query: Query<Entity, With<OpenXRTrackingRoot>>,
 ) {
     let root = tracking_root_query.get_single();
-    match root {
-        Ok(root) => {
-            // info!("root is");
-            for tracker in query.iter() {
-                info!("we got a new tracker");
-                commands.entity(root).add_child(tracker);
-            }
+    if let Ok(root) = root {
+        // info!("root is");
+        for tracker in query.iter() {
+            info!("we got a new tracker");
+            commands.entity(root).add_child(tracker);
         }
-        Err(_) => info!("root isnt spawned yet?"),
+    } else {
+        info!("root isnt spawned yet?")
     }
 }
 
@@ -69,61 +68,40 @@ pub fn update_open_xr_controllers(
 ) {
     //get controller
     let controller = oculus_controller.get_ref(&session, &frame_state, &xr_input, &action_sets);
-    //get left controller
-    let left_grip_space = controller.grip_space(Hand::Left);
-    let left_aim_space = controller.aim_space(Hand::Left);
-    let left_position = left_grip_space.0.pose.position.to_vec3();
-    //TODO figure out how to not get the entity multiple times
-    let left_aim_pose = left_controller_query.get_single_mut();
-    //set aim pose
-    match left_aim_pose {
-        Ok(left_entity) => {
-            if let (_, Some(mut pose)) = left_entity {
-                *pose = AimPose(Transform {
-                    translation: left_aim_space.0.pose.position.to_vec3(),
-                    rotation: verify_quat(left_aim_space.0.pose.orientation.to_quat()),
-                    scale: Vec3::splat(1.0),
-                });
-            }
-        }
-        Err(_) => debug!("no left controller entity found"),
-    }
-    //set translation
-    let left_translation = left_controller_query.get_single_mut();
-    if let Ok((mut transform, _)) = left_translation {
-        transform.translation = left_position
-    }
-    //set rotation
-    let left_rotataion = left_controller_query.get_single_mut();
-    if let Ok((mut transform, _)) = left_rotataion {
-        transform.rotation = verify_quat(left_grip_space.0.pose.orientation.to_quat())
-    }
-    //get right controller
-    let right_grip_space = controller.grip_space(Hand::Right);
-    let right_aim_space = controller.aim_space(Hand::Right);
-    let right_position = right_grip_space.0.pose.position.to_vec3();
 
-    let right_aim_pose = right_controller_query.get_single_mut();
-    match right_aim_pose {
-        Ok((_, right_entity)) => {
-            if let Some(mut pose) = right_entity {
-                *pose = AimPose(Transform {
-                    translation: right_aim_space.0.pose.position.to_vec3(),
-                    rotation: verify_quat(right_aim_space.0.pose.orientation.to_quat()),
-                    scale: Vec3::splat(1.0),
-                });
-            }
+    //set left controller position
+    let (left_grip_space, _) = controller.grip_space(Hand::Left);
+    let (left_aim_space, _) = controller.aim_space(Hand::Left);
+
+    if let Ok((mut transform, pose)) = left_controller_query.get_single_mut() {
+        if let Some(mut pose) = pose {
+            *pose = AimPose(Transform {
+                translation: left_aim_space.pose.position.to_vec3(),
+                rotation: verify_quat(left_aim_space.pose.orientation.to_quat()),
+                scale: Vec3::ONE,
+            });
         }
-        Err(_) => debug!("no right controller entity found"),
+        transform.translation = left_grip_space.pose.position.to_vec3();
+        transform.rotation = verify_quat(left_grip_space.pose.orientation.to_quat());
+    } else {
+        debug!("no left controller entity found");
     }
-    //set translation
-    let right_translation = right_controller_query.get_single_mut();
-    if let Ok((mut transform, _)) = right_translation {
-        transform.translation = right_position
-    }
-    //set rotation
-    let right_rotataion = right_controller_query.get_single_mut();
-    if let Ok((mut transform, _)) = right_rotataion {
-        transform.rotation = verify_quat(right_grip_space.0.pose.orientation.to_quat())
+
+    //set right controller position
+    let (right_grip_space, _) = controller.grip_space(Hand::Right);
+    let (right_aim_space, _) = controller.aim_space(Hand::Right);
+
+    if let Ok((mut transform, pose)) = right_controller_query.get_single_mut() {
+        if let Some(mut pose) = pose {
+            *pose = AimPose(Transform {
+                translation: right_aim_space.pose.position.to_vec3(),
+                rotation: verify_quat(right_aim_space.pose.orientation.to_quat()),
+                scale: Vec3::ONE,
+            });
+        }
+        transform.translation = right_grip_space.pose.position.to_vec3();
+        transform.rotation = verify_quat(right_grip_space.pose.orientation.to_quat());
+    } else {
+        debug!("no right controller entity found");
     }
 }

@@ -1,177 +1,51 @@
-use bevy::prelude::{Quat, Transform, Vec3};
+use bevy::prelude::{Transform, Vec3};
 use openxr::{Posef, Quaternionf, Vector3f};
 
 use super::Hand;
 
 pub fn get_simulated_open_hand_transforms(hand: Hand) -> [Transform; 26] {
     let test_hand_bones: [Vec3; 26] = [
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        }, //palm
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: -0.04,
-        }, //wrist
-        Vec3 {
-            x: -0.02,
-            y: 0.00,
-            z: 0.015,
-        }, //thumb
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.03,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.024,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.024,
-        },
-        Vec3 {
-            x: -0.01,
-            y: -0.015,
-            z: 0.0155,
-        }, //index
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.064,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.037,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.02,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.01,
-        },
-        Vec3 {
-            x: 0.0,
-            y: -0.02,
-            z: 0.016,
-        }, //middle
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.064,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.037,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.02,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.01,
-        },
-        Vec3 {
-            x: 0.01,
-            y: -0.015,
-            z: 0.015,
-        }, //ring
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.064,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.037,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.02,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.01,
-        },
-        Vec3 {
-            x: 0.02,
-            y: -0.01,
-            z: 0.015,
-        }, //little
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.064,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.037,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.02,
-        },
-        Vec3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.01,
-        },
+        Vec3::new(0.0, 0.0, 0.0), //palm
+        Vec3::new(0.0, 0.0, -0.04), //wrist
+        Vec3::new(-0.02, 0.00, 0.015), //thumb
+        Vec3::new(0.0, 0.0, 0.03),
+        Vec3::new(0.0, 0.0, 0.024),
+        Vec3::new(0.0, 0.0, 0.024),
+        Vec3::new(-0.01, -0.015, 0.0155), //index
+        Vec3::new(0.0, 0.0, 0.064),
+        Vec3::new(0.0, 0.0, 0.037),
+        Vec3::new(0.0, 0.0, 0.02),
+        Vec3::new(0.0, 0.0, 0.01),
+        Vec3::new(0.0, -0.02, 0.016), //middle
+        Vec3::new(0.0, 0.0, 0.064),
+        Vec3::new(0.0, 0.0, 0.037),
+        Vec3::new(0.0, 0.0, 0.02),
+        Vec3::new(0.0, 0.0, 0.01),
+        Vec3::new(0.01, -0.015, 0.015), //ring
+        Vec3::new(0.0, 0.0, 0.064),
+        Vec3::new(0.0, 0.0, 0.037),
+        Vec3::new(0.0, 0.0, 0.02),
+        Vec3::new(0.0, 0.0, 0.01),
+        Vec3::new(0.02, -0.01, 0.015), //little
+        Vec3::new(0.0, 0.0, 0.064),
+        Vec3::new(0.0, 0.0, 0.037),
+        Vec3::new(0.0, 0.0, 0.02),
+        Vec3::new(0.0, 0.0, 0.01),
     ];
     bones_to_transforms(test_hand_bones, hand)
 }
 
 fn bones_to_transforms(hand_bones: [Vec3; 26], hand: Hand) -> [Transform; 26] {
-    match hand {
-        Hand::Left => {
-            let mut result_array: [Transform; 26] = [Transform::default(); 26];
-            for (place, data) in result_array.iter_mut().zip(hand_bones.iter()) {
-                *place = Transform {
-                    translation: Vec3 {
-                        x: -data.x,
-                        y: -data.y,
-                        z: -data.z,
-                    },
-                    rotation: Quat::IDENTITY,
-                    scale: Vec3::splat(1.0),
-                }
-            }
-            result_array
-        }
-        Hand::Right => {
-            let mut result_array: [Transform; 26] = [Transform::default(); 26];
-            for (place, data) in result_array.iter_mut().zip(hand_bones.iter()) {
-                *place = Transform {
-                    translation: Vec3 {
-                        x: data.x,
-                        y: -data.y,
-                        z: -data.z,
-                    },
-                    rotation: Quat::IDENTITY,
-                    scale: Vec3::splat(1.0),
-                }
-            }
-            result_array
-        }
-    }
+    hand_bones.map(|Vec3 { x, y, z }| {
+        Transform::from_translation(Vec3 {
+            x: match hand {
+                Hand::Left => -x,
+                Hand::Right => x,
+            },
+            y: -y,
+            z: -z,
+        })
+    })
 }
 
 pub fn get_test_hand_pose_array() -> [Posef; 26] {

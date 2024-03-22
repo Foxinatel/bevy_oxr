@@ -314,7 +314,7 @@ impl CameraProjection for XRProjection {
             //  bevy uses the _reverse_ infinite projection
             //  https://dev.theomader.com/depth-precision/
             let z_reversal = Mat4::from_cols_array_2d(&[
-                [1f32, 0., 0., 0.],
+                [1., 0., 0., 0.],
                 [0., 1., 0., 0.],
                 [0., 0., -1., 0.],
                 [0., 0., 1., 1.],
@@ -381,9 +381,8 @@ pub fn xr_camera_head_sync(
     //TODO calculate HMD position
     for (mut transform, camera_type, mut xr_projection) in query.iter_mut() {
         let view_idx = camera_type.0 as usize;
-        let view = match views.get(view_idx) {
-            Some(views) => views,
-            None => continue,
+        let Some(view) = views.get(view_idx) else {
+            continue;
         };
         xr_projection.fov = view.fov;
         transform.rotation = view.pose.orientation.to_quat();
@@ -397,9 +396,8 @@ pub fn xr_camera_head_sync_render_world(
 ) {
     for (mut extracted_view, camera_type, root) in query.iter_mut() {
         let view_idx = camera_type.0 as usize;
-        let view = match views.get(view_idx) {
-            Some(views) => views,
-            None => continue,
+        let Some(view) = views.get(view_idx) else {
+            continue;
         };
         let mut transform = Transform::IDENTITY;
         transform.rotation = view.pose.orientation.to_quat();

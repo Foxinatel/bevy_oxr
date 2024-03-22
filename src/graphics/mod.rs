@@ -5,9 +5,8 @@ mod d3d12;
 #[cfg(feature = "vulkan")]
 mod vulkan;
 
-use bevy::ecs::query::With;
-use bevy::ecs::system::{Query, SystemState};
-use bevy::ecs::world::World;
+use bevy::prelude::*;
+use bevy::ecs::system::SystemState;
 use bevy::render::renderer::{
     RenderAdapter, RenderAdapterInfo, RenderDevice, RenderInstance, RenderQueue,
 };
