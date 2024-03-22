@@ -1,5 +1,3 @@
-use std::f32::consts::PI;
-
 use super::{
     actions::XrActionSets, oculus_touch::OculusController, trackers::OpenXRTrackingRoot, Hand,
     QuatConv, Vec3Conv,
@@ -42,8 +40,8 @@ impl Default for PrototypeLocomotionConfig {
             locomotion_type: LocomotionType::Head,
             locomotion_speed: 1.0,
             rotation_type: RotationType::Smooth,
-            snap_angle: 45.0 * (PI / 180.0),
-            smooth_rotation_speed: 0.5 * PI,
+            snap_angle: 45.0_f32.to_radians(),
+            smooth_rotation_speed: 90.0_f32.to_radians(),
             rotation_stick_deadzone: 0.2,
             rotation_timer: RotationTimer {
                 timer: Timer::from_seconds(1.0, TimerMode::Once),

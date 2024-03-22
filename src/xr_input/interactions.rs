@@ -1,5 +1,3 @@
-use std::f32::consts::PI;
-
 use bevy::log::{info, warn};
 use bevy::prelude::{
     Color, Component, Entity, Event, EventReader, EventWriter, Gizmos, GlobalTransform, Quat,
@@ -105,9 +103,9 @@ pub fn draw_interaction_gizmos(
             local.scale = Vec3::splat(0.1);
             let quat = Quat::from_euler(
                 bevy::prelude::EulerRot::XYZ,
-                45.0 * (PI / 180.0),
+                45.0_f32.to_radians(),
                 0.0,
-                45.0 * (PI / 180.0),
+                45.0_f32.to_radians(),
             );
             local.rotation = quat;
             let color = match interactor_state {

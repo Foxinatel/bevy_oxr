@@ -1,5 +1,3 @@
-use std::f32::consts::PI;
-
 use bevy::prelude::*;
 use openxr::{ActionTy, HandJoint};
 
@@ -248,7 +246,7 @@ pub fn update_hand_bones_emulated(
     ring_curl: f32,
     little_curl: f32,
 ) -> [Transform; 26] {
-    let left_hand_rot = Quat::from_rotation_y(PI);
+    let left_hand_rot = Quat::from_rotation_y(180_f32.to_radians());
     let hand_translation: Vec3 = controller_transform.translation;
 
     let controller_quat: Quat = match hand {
@@ -256,7 +254,7 @@ pub fn update_hand_bones_emulated(
         Hand::Right => controller_transform.rotation,
     };
 
-    let splay_direction = match hand {
+    let splay_direction: f32 = match hand {
         Hand::Left => -1.0,
         Hand::Right => 1.0,
     };
@@ -264,8 +262,8 @@ pub fn update_hand_bones_emulated(
     let mut calc_transforms = [Transform::default(); 26];
 
     //get palm quat
-    let y = Quat::from_rotation_y(-90.0 * PI / 180.0);
-    let x = Quat::from_rotation_x(-90.0 * PI / 180.0);
+    let y = Quat::from_rotation_y(-90.0_f32.to_radians());
+    let x = Quat::from_rotation_x(-90.0_f32.to_radians());
     let palm_quat = controller_quat.mul_quat(y).mul_quat(x);
     //get simulated bones
     let hand_transform_array: [Transform; 26] = get_simulated_open_hand_transforms(hand);
@@ -292,14 +290,14 @@ pub fn update_hand_bones_emulated(
     let mut prior_start: Option<Vec3> = None;
     let mut prior_quat: Option<Quat> = None;
     let mut prior_vector: Option<Vec3> = None;
-    let splay = Quat::from_rotation_y(splay_direction * 30.0 * PI / 180.0);
-    let huh = Quat::from_rotation_x(-35.0 * PI / 180.0);
+    let splay = Quat::from_rotation_y((splay_direction * 30.0).to_radians());
+    let huh = Quat::from_rotation_x(-35.0_f32.to_radians());
     let splay_quat = palm_quat.mul_quat(huh).mul_quat(splay);
     for bone in thumb_joints.iter() {
         match prior_start {
             Some(start) => {
                 let curl_angle: f32 = get_bone_curl_angle(*bone, thumb_curl);
-                let tp_lrot = Quat::from_rotation_y(splay_direction * curl_angle * PI / 180.0);
+                let tp_lrot = Quat::from_rotation_y((splay_direction * curl_angle).to_radians());
                 let tp_quat = prior_quat.unwrap().mul_quat(tp_lrot);
                 let thumb_prox = hand_transform_array[*bone];
                 let tp_start = start + prior_vector.unwrap();
@@ -342,13 +340,13 @@ pub fn update_hand_bones_emulated(
     let mut prior_start: Option<Vec3> = None;
     let mut prior_quat: Option<Quat> = None;
     let mut prior_vector: Option<Vec3> = None;
-    let splay = Quat::from_rotation_y(splay_direction * 10.0 * PI / 180.0);
+    let splay = Quat::from_rotation_y((splay_direction * 10.0).to_radians());
     let splay_quat = palm_quat.mul_quat(splay);
     for bone in thumb_joints.iter() {
         match prior_start {
             Some(start) => {
                 let curl_angle: f32 = get_bone_curl_angle(*bone, index_curl);
-                let tp_lrot = Quat::from_rotation_x(curl_angle * PI / 180.0);
+                let tp_lrot = Quat::from_rotation_x(curl_angle.to_radians());
                 let tp_quat = prior_quat.unwrap().mul_quat(tp_lrot);
                 let thumb_prox = hand_transform_array[*bone];
                 let tp_start = start + prior_vector.unwrap();
@@ -391,13 +389,13 @@ pub fn update_hand_bones_emulated(
     let mut prior_start: Option<Vec3> = None;
     let mut prior_quat: Option<Quat> = None;
     let mut prior_vector: Option<Vec3> = None;
-    let splay = Quat::from_rotation_y(splay_direction * 0.0 * PI / 180.0);
+    let splay = Quat::from_rotation_y((splay_direction * 0.0).to_radians());
     let splay_quat = palm_quat.mul_quat(splay);
     for bone in thumb_joints.iter() {
         match prior_start {
             Some(start) => {
                 let curl_angle: f32 = get_bone_curl_angle(*bone, middle_curl);
-                let tp_lrot = Quat::from_rotation_x(curl_angle * PI / 180.0);
+                let tp_lrot = Quat::from_rotation_x(curl_angle.to_radians());
                 let tp_quat = prior_quat.unwrap().mul_quat(tp_lrot);
                 let thumb_prox = hand_transform_array[*bone];
                 let tp_start = start + prior_vector.unwrap();
@@ -439,13 +437,13 @@ pub fn update_hand_bones_emulated(
     let mut prior_start: Option<Vec3> = None;
     let mut prior_quat: Option<Quat> = None;
     let mut prior_vector: Option<Vec3> = None;
-    let splay = Quat::from_rotation_y(splay_direction * -10.0 * PI / 180.0);
+    let splay = Quat::from_rotation_y((splay_direction * -10.0).to_radians());
     let splay_quat = palm_quat.mul_quat(splay);
     for bone in thumb_joints.iter() {
         match prior_start {
             Some(start) => {
                 let curl_angle: f32 = get_bone_curl_angle(*bone, ring_curl);
-                let tp_lrot = Quat::from_rotation_x(curl_angle * PI / 180.0);
+                let tp_lrot = Quat::from_rotation_x(curl_angle.to_radians());
                 let tp_quat = prior_quat.unwrap().mul_quat(tp_lrot);
                 let thumb_prox = hand_transform_array[*bone];
                 let tp_start = start + prior_vector.unwrap();
@@ -488,13 +486,13 @@ pub fn update_hand_bones_emulated(
     let mut prior_start: Option<Vec3> = None;
     let mut prior_quat: Option<Quat> = None;
     let mut prior_vector: Option<Vec3> = None;
-    let splay = Quat::from_rotation_y(splay_direction * -20.0 * PI / 180.0);
+    let splay = Quat::from_rotation_y((splay_direction * -20.0).to_radians());
     let splay_quat = palm_quat.mul_quat(splay);
     for bone in thumb_joints.iter() {
         match prior_start {
             Some(start) => {
                 let curl_angle: f32 = get_bone_curl_angle(*bone, little_curl);
-                let tp_lrot = Quat::from_rotation_x(curl_angle * PI / 180.0);
+                let tp_lrot = Quat::from_rotation_x(curl_angle.to_radians());
                 let tp_quat = prior_quat.unwrap().mul_quat(tp_lrot);
                 let thumb_prox = hand_transform_array[*bone];
                 let tp_start = start + prior_vector.unwrap();
