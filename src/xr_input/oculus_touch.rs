@@ -2,7 +2,7 @@ use crate::input::XrInput;
 use crate::resources::{XrInstance, XrSession};
 use crate::xr_input::controllers::Handed;
 use crate::xr_input::Hand;
-use bevy::prelude::{default, Commands, Res, ResMut, Resource};
+use bevy::prelude::{Commands, Res, ResMut, Resource};
 use openxr::{
     ActionSet, AnyGraphics, FrameState, Path, Posef, Session, Space, SpaceLocation, SpaceVelocity,
 };
@@ -135,207 +135,70 @@ impl OculusControllerRef<'_> {
             Err(_) => (SpaceLocation::default(), SpaceVelocity::default()),
         }
     }
-    pub fn squeeze(&self, hand: Hand) -> f32 {
-        match &self
-            .action_sets
-            .get_action_f32("oculus_input", "squeeze")
+    fn get_action_bool(&self, action_name: &'static str, hand: Option<Hand>) -> bool {
+        self.action_sets
+            .get_action_bool("oculus_input", action_name)
             .unwrap()
-            .state(self.session, subaction_path(hand))
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+            .state(self.session, hand.map(subaction_path).unwrap_or_default())
+            .map(|v| v.current_state)
+            .unwrap_or(false)
+    }
+    fn get_action_f32(&self, action_name: &'static str, hand: Option<Hand>) -> f32 {
+        self.action_sets
+            .get_action_f32("oculus_input", action_name)
+            .unwrap()
+            .state(self.session, hand.map(subaction_path).unwrap_or_default())
+            .map(|v| v.current_state)
+            .unwrap_or_default()
+    }
+    pub fn squeeze(&self, hand: Hand) -> f32 {
+        self.get_action_f32("squeeze", Some(hand))
     }
     pub fn trigger(&self, hand: Hand) -> f32 {
-        match self
-            .action_sets
-            .get_action_f32("oculus_input", "trigger")
-            .unwrap()
-            .state(self.session, subaction_path(hand))
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_f32("trigger", Some(hand))
     }
     pub fn trigger_touched(&self, hand: Hand) -> bool {
-        match self
-            .action_sets
-            .get_action_bool("oculus_input", "trigger_touched")
-            .unwrap()
-            .state(self.session, subaction_path(hand))
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_bool("trigger_touched", Some(hand))
     }
     pub fn x_button(&self) -> bool {
-        match self
-            .action_sets
-            .get_action_bool("oculus_input", "x_button")
-            .unwrap()
-            .state(self.session, Path::NULL)
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_bool("x_button", None)
     }
     pub fn x_button_touched(&self) -> bool {
-        match self
-            .action_sets
-            .get_action_bool("oculus_input", "x_button_touch")
-            .unwrap()
-            .state(self.session, Path::NULL)
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_bool("x_button_touch", None)
     }
     pub fn y_button(&self) -> bool {
-        match self
-            .action_sets
-            .get_action_bool("oculus_input", "y_button")
-            .unwrap()
-            .state(self.session, Path::NULL)
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_bool("y_button", None)
     }
     pub fn y_button_touched(&self) -> bool {
-        match self
-            .action_sets
-            .get_action_bool("oculus_input", "y_button_touch")
-            .unwrap()
-            .state(self.session, Path::NULL)
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_bool("y_button_touch", None)
     }
     pub fn menu_button(&self) -> bool {
-        match self
-            .action_sets
-            .get_action_bool("oculus_input", "menu_button")
-            .unwrap()
-            .state(self.session, Path::NULL)
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_bool("menu_button", None)
     }
     pub fn a_button(&self) -> bool {
-        match self
-            .action_sets
-            .get_action_bool("oculus_input", "a_button")
-            .unwrap()
-            .state(self.session, Path::NULL)
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_bool("a_button", None)
     }
     pub fn a_button_touched(&self) -> bool {
-        match self
-            .action_sets
-            .get_action_bool("oculus_input", "a_button_touch")
-            .unwrap()
-            .state(self.session, Path::NULL)
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_bool("a_button_touch", None)
     }
     pub fn b_button(&self) -> bool {
-        match self
-            .action_sets
-            .get_action_bool("oculus_input", "b_button")
-            .unwrap()
-            .state(self.session, Path::NULL)
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_bool("b_button", None)
     }
     pub fn b_button_touched(&self) -> bool {
-        match self
-            .action_sets
-            .get_action_bool("oculus_input", "b_button_touch")
-            .unwrap()
-            .state(self.session, Path::NULL)
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_bool("b_button_touch", None)
     }
     pub fn thumbstick_touch(&self, hand: Hand) -> bool {
-        match self
-            .action_sets
-            .get_action_bool("oculus_input", "thumbstick_touch")
-            .unwrap()
-            .state(self.session, subaction_path(hand))
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_bool("thumbstick_touch", Some(hand))
     }
     pub fn thumbstick(&self, hand: Hand) -> Thumbstick {
         Thumbstick {
-            x: match self
-                .action_sets
-                .get_action_f32("oculus_input", "thumbstick_x")
-                .unwrap()
-                .state(self.session, subaction_path(hand))
-                .map(|v| v.current_state)
-            {
-                Ok(v) => v,
-                Err(_) => default(),
-            },
-            y: match self
-                .action_sets
-                .get_action_f32("oculus_input", "thumbstick_y")
-                .unwrap()
-                .state(self.session, subaction_path(hand))
-                .map(|v| v.current_state)
-            {
-                Ok(v) => v,
-                Err(_) => default(),
-            },
-            click: match self
-                .action_sets
-                .get_action_bool("oculus_input", "thumbstick_click")
-                .unwrap()
-                .state(self.session, subaction_path(hand))
-                .map(|v| v.current_state)
-            {
-                Ok(v) => v,
-                Err(_) => default(),
-            },
+            x: self.get_action_f32("thumbstick_x", Some(hand)),
+            y: self.get_action_f32("thumbstick_y", Some(hand)),
+            click: self.get_action_bool("thumbstick_click", Some(hand)),
         }
     }
     pub fn thumbrest_touch(&self, hand: Hand) -> bool {
-        match self
-            .action_sets
-            .get_action_bool("oculus_input", "thumbrest_touch")
-            .unwrap()
-            .state(self.session, subaction_path(hand))
-        {
-            Ok(v) => v,
-            Err(_) => return default(),
-        }
-        .current_state
+        self.get_action_bool("thumbrest_touch", Some(hand))
     }
 }
 

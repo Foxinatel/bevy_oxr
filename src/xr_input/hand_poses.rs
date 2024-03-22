@@ -5,8 +5,8 @@ use super::Hand;
 
 pub fn get_simulated_open_hand_transforms(hand: Hand) -> [Transform; 26] {
     let test_hand_bones: [Vec3; 26] = [
-        Vec3::new(0.0, 0.0, 0.0), //palm
-        Vec3::new(0.0, 0.0, -0.04), //wrist
+        Vec3::new(0.0, 0.0, 0.0),      //palm
+        Vec3::new(0.0, 0.0, -0.04),    //wrist
         Vec3::new(-0.02, 0.00, 0.015), //thumb
         Vec3::new(0.0, 0.0, 0.03),
         Vec3::new(0.0, 0.0, 0.024),

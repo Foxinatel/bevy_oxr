@@ -166,65 +166,49 @@ pub(crate) fn update_hand_skeleton_from_emulated(
             true => 1.0,
             false => 0.0,
         };
-        let index_curl = action_sets
-            .get_action_f32(HAND_ACTION_SET, "index_value")
-            .unwrap()
-            .state(&session, subaction_path)
-            .unwrap()
-            .current_state;
-        let middle_curl = action_sets
-            .get_action_f32(HAND_ACTION_SET, "middle_value")
-            .unwrap()
-            .state(&session, subaction_path)
-            .unwrap()
-            .current_state;
-        let ring_curl = action_sets
-            .get_action_f32(HAND_ACTION_SET, "ring_value")
-            .unwrap()
-            .state(&session, subaction_path)
-            .unwrap()
-            .current_state;
-        let little_curl = action_sets
-            .get_action_f32(HAND_ACTION_SET, "little_value")
-            .unwrap()
-            .state(&session, subaction_path)
-            .unwrap()
-            .current_state;
+        let get_action_f32 = |action_name| {
+            action_sets
+                .get_action_f32(HAND_ACTION_SET, action_name)
+                .unwrap()
+                .state(&session, subaction_path)
+                .unwrap()
+                .current_state
+        };
+        let index_curl = get_action_f32("index_value");
+        let middle_curl = get_action_f32("middle_value");
+        let ring_curl = get_action_f32("ring_value");
+        let little_curl = get_action_f32("little_value");
+        let update_hand_bones_emulated = |transform| {
+            update_hand_bones_emulated(
+                transform,
+                hand,
+                thumb_curl,
+                index_curl,
+                middle_curl,
+                ring_curl,
+                little_curl,
+            )
+        };
         match hand {
-            Hand::Left => match left {
-                Ok(hand_transform) => {
-                    data[0] = update_hand_bones_emulated(
-                        hand_transform,
-                        hand,
-                        thumb_curl,
-                        index_curl,
-                        middle_curl,
-                        ring_curl,
-                        little_curl,
-                    );
+            Hand::Left => {
+                if let Ok(hand_transform) = left {
+                    data[0] = update_hand_bones_emulated(hand_transform);
+                } else {
+                    debug!("no left controller transform for hand bone emulation");
                 }
-                Err(_) => debug!("no left controller transform for hand bone emulation"),
-            },
-            Hand::Right => match right {
-                Ok(hand_transform) => {
-                    data[1] = update_hand_bones_emulated(
-                        hand_transform,
-                        hand,
-                        thumb_curl,
-                        index_curl,
-                        middle_curl,
-                        ring_curl,
-                        little_curl,
-                    );
+            }
+            Hand::Right => {
+                if let Ok(hand_transform) = right {
+                    data[1] = update_hand_bones_emulated(hand_transform);
+                } else {
+                    debug!("no right controller transform for hand bone emulation")
                 }
-                Err(_) => debug!("no right controller transform for hand bone emulation"),
-            },
+            }
         }
     }
     for (mut t, bone, hand, status, mut radius) in bones.iter_mut() {
-        match status {
-            BoneTrackingStatus::Emulated => {}
-            BoneTrackingStatus::Tracked => continue,
+        if *status == BoneTrackingStatus::Tracked {
+            continue;
         }
         radius.0 = get_bone_gizmo_style(bone).0;
 

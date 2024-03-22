@@ -5,8 +5,8 @@ mod d3d12;
 #[cfg(feature = "vulkan")]
 mod vulkan;
 
-use bevy::prelude::*;
 use bevy::ecs::system::SystemState;
+use bevy::prelude::*;
 use bevy::render::renderer::{
     RenderAdapter, RenderAdapterInfo, RenderDevice, RenderInstance, RenderQueue,
 };
